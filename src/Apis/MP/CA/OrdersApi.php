@@ -27,6 +27,7 @@ use GuzzleHttp\Psr7\Request;
 use Walmart\Apis\BaseApi;
 use Walmart\ApiException;
 use Walmart\ObjectSerializer;
+use Walmart\XmlParser;
 
 /**
  * OrdersApi Class Doc Comment
@@ -704,7 +705,7 @@ class OrdersApi extends BaseApi
      *
      * @throws \Walmart\ApiException on non-2xx response
      * @throws \InvalidArgumentException
-     * @return \Walmart\Models\MP\CA\Orders\WFSOrdersListType
+     * @return \Walmart\Models\MP\CA\Orders\OrdersListType
      */
     public function getAllOrders(
         string $createdStartDate,
@@ -717,7 +718,7 @@ class OrdersApi extends BaseApi
         ?string $toExpectedShipDate = null,
         ?string $limit = null,
         ?string $productInfo = null
-    ): \Walmart\Models\MP\CA\Orders\WFSOrdersListType {
+    ): array {
         return $this->getAllOrdersWithHttpInfo($createdStartDate, $sku, $customerOrderId, $purchaseOrderId, $status, $createdEndDate, $fromExpectedShipDate, $toExpectedShipDate, $limit, $productInfo);
     }
 
@@ -739,7 +740,7 @@ class OrdersApi extends BaseApi
      *
      * @throws \Walmart\ApiException on non-2xx response
      * @throws \InvalidArgumentException
-     * @return \Walmart\Models\MP\CA\Orders\WFSOrdersListType
+     * @return \Walmart\Models\MP\CA\Orders\OrdersListType
      */
     protected function getAllOrdersWithHttpInfo(
         string $createdStartDate,
@@ -752,7 +753,7 @@ class OrdersApi extends BaseApi
         ?string $toExpectedShipDate = null,
         ?string $limit = null,
         ?string $productInfo = null,
-    ): \Walmart\Models\MP\CA\Orders\WFSOrdersListType {
+    ): array {
         $request = $this->getAllOrdersRequest($createdStartDate, $sku, $customerOrderId, $purchaseOrderId, $status, $createdEndDate, $fromExpectedShipDate, $toExpectedShipDate, $limit, $productInfo);
         $this->writeDebug($request);
         $this->writeDebug((string) $request->getBody());
@@ -802,19 +803,20 @@ class OrdersApi extends BaseApi
             }
             switch ($statusCode) {
                 case 200:
-                    if ('\Walmart\Models\MP\CA\Orders\WFSOrdersListType' === '\SplFileObject') {
+                    /*if ('\Walmart\Models\MP\CA\Orders\OrdersListType' === '\SplFileObject') {
                         $content = $response->getBody(); //stream goes to serializer
                     } else {
                         $content = (string) $response->getBody();
-                        if ('\Walmart\Models\MP\CA\Orders\WFSOrdersListType' !== 'string') {
+                        if ('\Walmart\Models\MP\CA\Orders\OrdersListType' !== 'string') {
                             $content = json_decode($content);
                         }
                     }
-
-                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Orders\WFSOrdersListType', $response->getHeaders());
+                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Orders\OrdersListType', $response->getHeaders());*/
+                    $content = (string) $response->getBody();
+                    return XmlParser::parse($content, '\Walmart\Models\MP\CA\Orders\OrdersListType');
             }
 
-            $returnType = '\Walmart\Models\MP\CA\Orders\WFSOrdersListType';
+            $returnType = '\Walmart\Models\MP\CA\Orders\OrdersListType';
             if ($returnType === '\SplFileObject') {
                 $content = $response->getBody(); //stream goes to serializer
             } else {
@@ -830,7 +832,7 @@ class OrdersApi extends BaseApi
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\Walmart\Models\MP\CA\Orders\WFSOrdersListType',
+                        '\Walmart\Models\MP\CA\Orders\OrdersListType',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
@@ -912,7 +914,7 @@ class OrdersApi extends BaseApi
         ?string $limit = null,
         ?string $productInfo = null,
     ): PromiseInterface {
-        $returnType = '\Walmart\Models\MP\CA\Orders\WFSOrdersListType';
+        $returnType = '\Walmart\Models\MP\CA\Orders\OrdersListType';
         $request = $this->getAllOrdersRequest($createdStartDate, $sku, $customerOrderId, $purchaseOrderId, $status, $createdEndDate, $fromExpectedShipDate, $toExpectedShipDate, $limit, $productInfo);
         $this->writeDebug($request);
         $this->writeDebug((string) $request->getBody());
@@ -1168,14 +1170,14 @@ class OrdersApi extends BaseApi
      *
      * @throws \Walmart\ApiException on non-2xx response
      * @throws \InvalidArgumentException
-     * @return \Walmart\Models\MP\CA\Orders\WFSOrdersListType
+     * @return \Walmart\Models\MP\CA\Orders\OrdersListType
      */
     public function getAllReleasedOrders(
         ?string $createdStartDate = null,
         ?string $createdEndDate = null,
         ?string $limit = '10',
         ?string $productInfo = null
-    ): \Walmart\Models\MP\CA\Orders\WFSOrdersListType {
+    ): \Walmart\Models\MP\CA\Orders\OrdersListType {
         return $this->getAllReleasedOrdersWithHttpInfo($createdStartDate, $createdEndDate, $limit, $productInfo);
     }
 
@@ -1191,14 +1193,14 @@ class OrdersApi extends BaseApi
      *
      * @throws \Walmart\ApiException on non-2xx response
      * @throws \InvalidArgumentException
-     * @return \Walmart\Models\MP\CA\Orders\WFSOrdersListType
+     * @return \Walmart\Models\MP\CA\Orders\OrdersListType
      */
     protected function getAllReleasedOrdersWithHttpInfo(
         ?string $createdStartDate = null,
         ?string $createdEndDate = null,
         ?string $limit = '10',
         ?string $productInfo = null,
-    ): \Walmart\Models\MP\CA\Orders\WFSOrdersListType {
+    ): \Walmart\Models\MP\CA\Orders\OrdersListType {
         $request = $this->getAllReleasedOrdersRequest($createdStartDate, $createdEndDate, $limit, $productInfo);
         $this->writeDebug($request);
         $this->writeDebug((string) $request->getBody());
@@ -1248,19 +1250,19 @@ class OrdersApi extends BaseApi
             }
             switch ($statusCode) {
                 case 200:
-                    if ('\Walmart\Models\MP\CA\Orders\WFSOrdersListType' === '\SplFileObject') {
+                    if ('\Walmart\Models\MP\CA\Orders\OrdersListType' === '\SplFileObject') {
                         $content = $response->getBody(); //stream goes to serializer
                     } else {
                         $content = (string) $response->getBody();
-                        if ('\Walmart\Models\MP\CA\Orders\WFSOrdersListType' !== 'string') {
+                        if ('\Walmart\Models\MP\CA\Orders\OrdersListType' !== 'string') {
                             $content = json_decode($content);
                         }
                     }
 
-                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Orders\WFSOrdersListType', $response->getHeaders());
+                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Orders\OrdersListType', $response->getHeaders());
             }
 
-            $returnType = '\Walmart\Models\MP\CA\Orders\WFSOrdersListType';
+            $returnType = '\Walmart\Models\MP\CA\Orders\OrdersListType';
             if ($returnType === '\SplFileObject') {
                 $content = $response->getBody(); //stream goes to serializer
             } else {
@@ -1276,7 +1278,7 @@ class OrdersApi extends BaseApi
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\Walmart\Models\MP\CA\Orders\WFSOrdersListType',
+                        '\Walmart\Models\MP\CA\Orders\OrdersListType',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
@@ -1334,7 +1336,7 @@ class OrdersApi extends BaseApi
         ?string $limit = '10',
         ?string $productInfo = null,
     ): PromiseInterface {
-        $returnType = '\Walmart\Models\MP\CA\Orders\WFSOrdersListType';
+        $returnType = '\Walmart\Models\MP\CA\Orders\OrdersListType';
         $request = $this->getAllReleasedOrdersRequest($createdStartDate, $createdEndDate, $limit, $productInfo);
         $this->writeDebug($request);
         $this->writeDebug((string) $request->getBody());

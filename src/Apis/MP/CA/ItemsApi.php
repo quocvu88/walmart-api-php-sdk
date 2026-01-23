@@ -27,6 +27,7 @@ use GuzzleHttp\Psr7\Request;
 use Walmart\Apis\BaseApi;
 use Walmart\ApiException;
 use Walmart\ObjectSerializer;
+use Walmart\XmlParser;
 
 /**
  * ItemsApi Class Doc Comment
@@ -44,7 +45,7 @@ class ItemsApi extends BaseApi
      */
     public const contentTypes = [
         'bulkItemSetupCA' => 'multipart/form-data',
-        'getAllItems' => 'application/json',
+        'getAllItems' => 'application/xml',
         'getAnItem' => 'application/json',
         'retireAnItem' => 'application/json',
     ];
@@ -405,7 +406,7 @@ class ItemsApi extends BaseApi
         ?string $sku = null,
         ?string $offset = '0',
         ?string $limit = '20'
-    ): \Walmart\Models\MP\CA\Items\ItemResponses {
+    ): array {
         return $this->getAllItemsWithHttpInfo($nextCursor, $sku, $offset, $limit);
     }
 
@@ -428,7 +429,7 @@ class ItemsApi extends BaseApi
         ?string $sku = null,
         ?string $offset = '0',
         ?string $limit = '20',
-    ): \Walmart\Models\MP\CA\Items\ItemResponses {
+    ): array {
         $request = $this->getAllItemsRequest($nextCursor, $sku, $offset, $limit);
         $this->writeDebug($request);
         $this->writeDebug((string) $request->getBody());
@@ -478,7 +479,7 @@ class ItemsApi extends BaseApi
             }
             switch ($statusCode) {
                 case 200:
-                    if ('\Walmart\Models\MP\CA\Items\ItemResponses' === '\SplFileObject') {
+                    /*if ('\Walmart\Models\MP\CA\Items\ItemResponses' === '\SplFileObject') {
                         $content = $response->getBody(); //stream goes to serializer
                     } else {
                         $content = (string) $response->getBody();
@@ -486,8 +487,9 @@ class ItemsApi extends BaseApi
                             $content = json_decode($content);
                         }
                     }
-
-                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Items\ItemResponses', $response->getHeaders());
+                    return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\CA\Items\ItemResponses');*/
+                    $content = (string) $response->getBody();
+                    return XmlParser::parse($content, '\Walmart\Models\MP\CA\Items\ItemResponses', $response->getHeaders());
             }
 
             $returnType = '\Walmart\Models\MP\CA\Items\ItemResponses';
