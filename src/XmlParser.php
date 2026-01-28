@@ -15,7 +15,7 @@ class XmlParser
         'methodCode',
     ];
 
-    public static function parse($xml, $type = null, $header = null)
+    public static function parse($xml, $type = null)
     {
         $xml = simplexml_load_string($xml);
 
@@ -43,9 +43,7 @@ class XmlParser
     {
         $namespaces = $xml->getNamespaces(true);
         $return = new \Walmart\Models\MP\CA\Items\ItemResponses();
-        dump($xml->ItemResponse[0]);
         foreach ($xml as $key => $value) {
-            //echo $key. ' - ' . json_encode($value) . '<br>';
             $parsedValue = self::parseXmlRecursive($value);
             $setter = 'set' . ucfirst($key);
             if (method_exists($return, $setter)) {
@@ -131,12 +129,9 @@ class XmlParser
         foreach ($children as $child) {
             $name = $child->getName();
             $value = self::parseXmlRecursive($child);
-
-            // LUÔN append, KHÔNG overwrite
             $result[$name][] = $value;
         }
 
-        // Normalize: nếu mỗi key chỉ có 1 phần tử → lấy value
         foreach ($result as $key => $values) {
             if (count($values) === 1) {
                 $result[$key] = $values[0];
@@ -148,48 +143,34 @@ class XmlParser
     protected static function castValue(string $value)
     {
         $value = trim($value);
-
-        // int
         if (preg_match('/^-?\d+$/', $value)) {
             return (int) $value;
         }
-
-        // float (decimal)
         if (is_numeric($value)) {
             return (float) $value;
         }
-
         return $value;
     }
 
     protected static function xmlToArray(\SimpleXMLElement $node)
     {
         $children = [];
-
-        // 1️⃣ children không namespace
         foreach ($node->children() as $child) {
             $children[] = $child;
         }
-
-        // 2️⃣ children theo TẤT CẢ namespace
         foreach ($node->getNamespaces(true) as $ns) {
             foreach ($node->children($ns) as $child) {
                 $children[] = $child;
             }
         }
-
-        // 3️⃣ Không có children → text node
         if (!$children) {
             return self::castValue((string) $node);
         }
-
         $result = [];
-
         foreach ($children as $child) {
             $key = $child->getName();
+            $key = lcfirst($key);
             $value = self::xmlToArray($child);
-
-            // Node lặp → array
             if (array_key_exists($key, $result)) {
                 if (!is_array($result[$key]) || !array_is_list($result[$key])) {
                     $result[$key] = [$result[$key]];
@@ -199,7 +180,6 @@ class XmlParser
                 $result[$key] = $value;
             }
         }
-
         return $result;
     }
 
@@ -208,25 +188,15 @@ class XmlParser
         string $namespace,
         ?object $object = null
     ): object {
-        // Nếu chưa có object gốc → tạo object rỗng
         if ($object === null) {
             $object = new \stdClass();
         }
-
         foreach ($data as $key => $value) {
             $value = self::normalizeValue($key, $value);
-            // Setter name
             $setter = 'set' . ucfirst($key);
-
-            // Class theo namespace + key
             $className = $namespace . '\\' . ucfirst($key);
-
-            // ===============================
-            // CASE 1: value là LIST (array số)
-            // ===============================
             if (is_array($value) && array_is_list($value)) {
                 $items = [];
-
                 foreach ($value as $item) {
                     if (is_array($item)) {
                         if (class_exists($className)) {
@@ -250,10 +220,6 @@ class XmlParser
 
                 continue;
             }
-
-            // ===============================
-            // CASE 2: value là ARRAY ASSOCIATIVE
-            // ===============================
             if (is_array($value)) {
                 if (class_exists($className)) {
                     $childObject = new $className();
@@ -274,17 +240,12 @@ class XmlParser
 
                 continue;
             }
-
-            // ===============================
-            // CASE 3: value là SCALAR
-            // ===============================
             if (method_exists($object, $setter)) {
                 $object->$setter($value);
             } else {
                 $object->$key = $value;
             }
         }
-
         return $object;
     }
 
@@ -293,7 +254,6 @@ class XmlParser
         if (is_string($value) && in_array($key, self::$upperFields, true)) {
             return strtoupper($value);
         }
-
         return $value;
     }
 
