@@ -835,7 +835,7 @@ class OrdersApi extends BaseApi
                             $content = json_decode($content);
                         }
                     }
-
+                    //dump($content->list->elements->order[10]);
                     return ObjectSerializer::deserialize($content, '\Walmart\Models\MP\US\Orders\PurchaseOrderTypeV3', $response->getHeaders());
             }
 
