@@ -1,6 +1,5 @@
 {
-    "name": "quocvu88/walmart-api",
-    "version": "0.1.0",
+    "name": "quocvu88/walmart-api-php-sdk",
     "description": "A PHP client for Walmart's Marketplace, 1P Supplier, and Content Provider APIs. Fork form highsidelabs.co",
     "keywords": [
         "walmart",
@@ -17,8 +16,8 @@
     "authors": [
         {
             "name": "Quocvu88",
-            "homepage": "https://quocvu88.com",
-            "email": "admin@quocvu88.com"
+            "homepage": "https://quocvu.com",
+            "email": "admin@quocvu.com"
         }
     ],
     "require": {
